@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#INSTLAMOS VARNISH
+sudo apt install varnish -y
+
+#INICIAMOS VARNISH
+sudo systemctl start varnish
+
+#HABILITAMOS VARNISH EN INICIO DE SISTEMA
+sudo systemctl enable varnish
+
+#FIN INSTALACIÓN VARNISH
+ 
+exit

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#INSTALAMOS KEEPALIVED
+sudo apt-get install -y keepalived
+
+#INICIAMOS KEEPALIVED
+sudo systemctl start keepalived.service
+
+#INCLUIMOS KEEPALIVED EN EL ARRANQUE DEL SISTEMA
+sudo systemctl enable keepalived.service
+
+#FIN INSTALACIÓN
+
+exit

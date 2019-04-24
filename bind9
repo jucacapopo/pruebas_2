@@ -1,0 +1,187 @@
+#!/bin/bash
+
+#INSTALACIÓN DNS
+#Instalar en ambos servidores
+
+#Actualizamos repositorios de paquetes 
+sudo apt update -y
+
+#Instalamos bind9 y utilidades 
+sudo apt install -y bind9 bind9utils bind9-doc dnsutils
+ 
+#Nos movemos a la carpeta de archivos de configuración de bind
+cd /etc/bind/
+
+#Editamos archivo de configuración general
+#sudo nano named.conf
+
+#Borramos archivo
+sudo true > /etc/bind/named.conf
+
+#Escribimos archivo
+sudo echo" // This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the
+// structure of BIND configuration files in Debian, *BEFORE* you customize
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+
+include "/etc/bind/named.conf.log";
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+//include "/etc/bind/named.conf.default-zones";" >> /etc/bind/named.conf
+
+
+#Editamos el siguiente archivo de configuración del servidor DNS 
+#sudo nano named.conf.local
+
+#Borramos archivo
+sudo true > /etc/bind/named.conf.local
+
+#Escribimos archivo
+sudo echo "//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+
+acl usuarios { 10.246.0.0/18; };
+
+view usuarios {
+  allow-recursion { any; };
+
+
+  zone "dof6.com" IN {
+     type master;
+     file "/etc/bind/db.dof6";
+     allow-update { none; };
+  };
+
+
+
+  zone "movistarplus.es" IN {
+     type master;
+     file "/etc/bind/db.movistarplus";
+     allow-update { none; };
+  };
+
+
+  zone "vod.cdn.telefonica.com" IN {
+     type master;
+     file "/etc/bind/db.vod.cdn.telefonica";
+     allow-update { none; };
+  };
+
+
+};" >> /etc/bind/named.conf.local
+
+
+#Creamos archivo de zona "dof6.com" 
+sudo touch db.dof6
+
+#Escribimos archivo db.dof6
+sudo echo ";
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     dof6.com. root.dof6.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@                       IN      NS      ns
+ns                      IN      A       127.0.0.188
+ottcache                IN      A       10.246.125.4
+voddelivery             IN      A       10.246.125.4
+stage-clientservices    IN      A       10.246.125.4
+homeservicesdirectory   IN      A       10.246.125.4
+lic.playrenfe           IN      A       10.246.125.4" >> /etc/bind/db.dof6
+
+
+#Creamos archivo de configuración de zona "movistarplus.es"
+sudo touch db.movistarplus
+
+#Escribimos archivo db.movistarplus
+sudo echo ";
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     movistarplus.es. root.movistarplus.es. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns
+ns      IN      A       127.0.0.188
+www     IN      A       10.246.125.4
+@       IN      A       10.246.125.4" >> /etc/bind/db.movistarplus
+
+
+#Creamos archivo de configuración de zona "vod.cdn.terlefonica.com"
+sudo touch db.vod.cdn.telefonica
+
+#Escribimos archivo db.vod.cdn.telefonica
+sudo echo ";
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     vod.cdn.telefonica.com. root.vod.cdn.telefonica.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns
+ns      IN      A       127.0.0.188
+*       IN      A       10.246.125.4" >> /etc/bind/db.vod.cdn.telefonica
+
+
+#Creamos archivo de configuración de log named.conf.log
+sudo touch named.conf.local.log
+
+#Escribimos archivo named.conf.local.log
+sudo echo "logging {
+  channel bind_log {
+    file "/var/log/named/bind.log" versions 3 size 5m;
+    severity info;
+    print-category yes;
+    print-severity yes;
+    print-time yes;
+  };
+  category default { bind_log; };
+  category update { bind_log; };
+  category update-security { bind_log; };
+  category security { bind_log; };
+  category queries { bind_log; };
+  category lame-servers { null; };
+};" >> /etc/bind/named.conf.local.log
+
+
+#Crear carpeta de archivos log bind9
+sudo mkdir -p /var/log/named
+
+
+#Dar propiedad a la carpeta que hemos generado
+sudo chown bind -R /var/log/named
+
+
+#Iniciar servidor DNS e incluirlo en el inicio del sistema
+sudo systemctl start bind9
+sudo systemctl enable bind9
+
+#COMPROBAR INSTALACIÓN
+nslookup movistarplus.es
+
+
+#FIN INSTALACIÓN BIND9 (SERVIDOR DNS)
+
+exit

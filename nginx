@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#INSTALAMOS NGINX
+sudo apt install nginx -y
+
+#INICIAMOS NUESTRO SERVIDOR WEB NGINX
+sudo systemctl start nginx
+
+#INCLUIMOS EN ARRANQUE DEL SISTEMA
+sudo systemctl enable nginx
+
+#FIN INSTALACIÓN NGINX
+
+exit
